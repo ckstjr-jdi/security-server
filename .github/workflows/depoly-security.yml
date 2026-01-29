@@ -2,22 +2,21 @@ on:
   push:
     branches:
       - main
-
 jobs:
-  deploy:
+  ec2deploy:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: SSH로 EC2 ubuntu에 접속하기
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        script_stop: true
-        script: |
-          cd /home/kiwi/security-server
-          git pull origin main
-          ./gradlew clean build
-          sudo fuser -k -n tcp 8080 || true
-          nohup java -jar build/libs/*SNAPSHOT.jar > ./security.log 2>&1 &
+    steps:
+      - name: EC2서버에 접속하기
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            cd /home/ubuntu/security-server
+            git pull origin main
+            ./gradlew clean build
+            sudo fuser -k -n tcp 8080 || true
+            nohup java -jar build/libs/*SNAPSHOT.jar > ./scurity.log 2>&1 &
